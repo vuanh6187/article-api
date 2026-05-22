@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - Article</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="header">
+    <div class="header-inner">
+        <a class="logo" th:href="@{/home}">Article</a>
+        <div class="user-menu" th:if="${currentUser != null}">
+            <span class="user-info" th:text="${currentUser.username}">username</span>
+            <a class="btn-link" th:href="@{/profile}">Sửa thông tin</a>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn-link btn-logout">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</header>
+<main class="main">
+    <div class="content-card">
+        <p class="hello-world">Hello World</p>
+    </div>
+</main>
+</body>
+</html>
