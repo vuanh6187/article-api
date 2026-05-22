@@ -20,4 +20,5 @@ public interface ArticleService {
     void delete(Long id, User currentUser);
 
     boolean isOwner(Long articleId, Long userId);
+    List<ArticleSummaryResponse> findArticleByTag(String tag);
 }

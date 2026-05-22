@@ -79,6 +79,14 @@ public class ArticleServiceImpl implements ArticleService {
                 .orElse(false);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArticleSummaryResponse> findArticleByTag(String tag) {
+        return articleRepository.findAllArticleWithTag(tag).stream()
+                .map(this::toSummary)
+                .toList();
+    }
+
     private void ensureOwner(Article article, User currentUser) {
         if (!article.getAuthor().getId().equals(currentUser.getId())) {
             throw new ForbiddenException("Bạn không có quyền thao tác bài viết này");

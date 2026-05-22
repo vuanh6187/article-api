@@ -9,7 +9,30 @@
         <a class="btn-primary btn-inline" th:href="@{/articles/new}">Tạo bài viết</a>
     </div>
 
-    <div class="empty-state" th:if="${#lists.isEmpty(articles)}">
+    <form class="search-bar" th:action="@{/home}" method="get">
+        <input type="text"
+               name="tag"
+               class="search-input"
+               placeholder="Tìm theo tag..."
+               th:value="${searchTag}">
+        <button type="submit" class="search-btn" aria-label="Tìm kiếm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/>
+                <line x1="16.65" y1="16.65" x2="21" y2="21"/>
+            </svg>
+        </button>
+    </form>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(articles) and searchTag != null}">
+        <p th:text="'Không tìm thấy bài viết với tag &quot;' + ${searchTag} + '&quot;'">
+            Không tìm thấy bài viết với tag này.
+        </p>
+        <a class="btn-secondary btn-inline" th:href="@{/home}">Xem tất cả bài viết</a>
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(articles) and searchTag == null}">
         <p>Chưa có bài viết nào. Hãy tạo bài viết đầu tiên!</p>
     </div>
 

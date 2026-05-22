@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,7 +38,11 @@ public class ArticleApiController {
     private final AuthService authService;
 
     @GetMapping
-    public List<ArticleSummaryResponse> listArticles() {
+    public List<ArticleSummaryResponse> listArticles(
+            @RequestParam(value = "tag", required = false) String tag) {
+        if (tag != null && !tag.isBlank()) {
+            return articleService.findArticleByTag(tag.trim());
+        }
         return articleService.findAllSummaries();
     }
 
