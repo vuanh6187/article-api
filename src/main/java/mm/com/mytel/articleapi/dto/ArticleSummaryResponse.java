@@ -3,9 +3,11 @@ package mm.com.mytel.articleapi.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class ArticleSummaryResponse {
 
@@ -13,6 +15,6 @@ public class ArticleSummaryResponse {
     private String title;
     private String description;
     private String tag;
-    private boolean isLockComment;
+    private boolean lockComment;
     private String authorUsername;
 }

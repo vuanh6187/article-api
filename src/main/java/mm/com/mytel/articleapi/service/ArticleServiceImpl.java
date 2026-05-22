@@ -7,7 +7,10 @@ import mm.com.mytel.articleapi.entity.Article;
 import mm.com.mytel.articleapi.entity.User;
 import mm.com.mytel.articleapi.exception.ForbiddenException;
 import mm.com.mytel.articleapi.exception.NotFoundException;
+import mm.com.mytel.articleapi.config.CacheConfig;
 import mm.com.mytel.articleapi.repo.ArticleRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.ARTICLE_SUMMARIES)
     public List<ArticleSummaryResponse> findAllSummaries() {
         return articleRepository.findAllWithAuthorOrderByCreatedAtDesc().stream()
                 .map(this::toSummary)
@@ -36,6 +40,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.ARTICLE_SUMMARIES, allEntries = true)
     public Article create(ArticleRequest request, User author) {
         Article article = Article.builder()
                 .title(request.getTitle())
@@ -50,6 +55,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.ARTICLE_SUMMARIES, allEntries = true)
     public Article update(Long id, ArticleRequest request, User currentUser) {
         Article article = findById(id);
         ensureOwner(article, currentUser);
@@ -65,6 +71,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = CacheConfig.ARTICLE_SUMMARIES, allEntries = true)
     public void delete(Long id, User currentUser) {
         Article article = findById(id);
         ensureOwner(article, currentUser);
@@ -99,7 +106,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .title(article.getTitle())
                 .description(article.getDescription())
                 .tag(article.getTag())
-                .isLockComment(article.isLockComment())
+                .lockComment(article.isLockComment())
                 .authorUsername(article.getAuthor().getUsername())
                 .build();
     }
