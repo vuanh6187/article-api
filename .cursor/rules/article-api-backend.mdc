@@ -1,0 +1,78 @@
+---
+description: Spring backend conventions for article-api (service interfaces, error codes)
+globs: src/main/java/**/*.java
+alwaysApply: true
+---
+
+# Article API Backend Conventions
+
+## Service layer
+
+Every `@Service` class must have an interface:
+
+- Interface: `XxxService` in `service/` or `security/`
+- Implementation: `XxxServiceImpl` with `@Service`, implements `XxxService`
+- Inject the **interface** in components/config, not the implementation
+
+```java
+// ✅ GOOD
+public interface AuthService { ... }
+
+@Service
+public class AuthServiceImpl implements AuthService { ... }
+
+// Component
+private final AuthService authService;
+```
+
+## HTTP error codes
+
+Use `ErrorCode` enum and typed exceptions extending `ApiException`. REST responses use `ApiErrorResponse` with `code` and `message`.
+
+| Code | HTTP | Use case |
+|------|------|----------|
+| 200 | OK | Success (GET, PUT) |
+| 201 | Created | Register, create article/comment |
+| 204 | No Content | Delete |
+| 400 | Bad Request | Validation / bad request |
+| 401 | Unauthorized | Not logged in / wrong credentials / bad token |
+| 403 | Forbidden | Not owner (update/delete article) |
+| 404 | Not Found | Resource not found |
+| 409 | Conflict | Duplicate username/email |
+| 500 | Internal Server Error | Unexpected server error |
+
+### Exception mapping
+
+- `BadRequestException` → 400
+- `UnauthorizedException` → 401
+- `ForbiddenException` → 403
+- `NotFoundException` → 404
+- `ConflictException` → 409
+
+### REST error body example
+
+```json
+{
+  "code": 409,
+  "message": "Email đã tồn tại"
+}
+```
+
+Validation errors (400) may include `errors`:
+
+```json
+{
+  "code": 400,
+  "message": "Validation / bad request",
+  "errors": {
+    "email": "Email must be valid"
+  }
+}
+```
+
+## Layer structure
+
+- `component/` — MVC controllers + REST controllers
+- `service/` — business logic (interface + impl)
+- `repo/` — JPA repositories
+- `entity/`, `dto/`, `exception/`, `config/`, `security/`
