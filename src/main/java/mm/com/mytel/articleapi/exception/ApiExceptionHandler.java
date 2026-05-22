@@ -1,7 +1,6 @@
 package mm.com.mytel.articleapi.exception;
 
 import mm.com.mytel.articleapi.component.AuthApiComponent;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,21 +14,32 @@ import java.util.Map;
 public class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.badRequest().body(ApiErrorResponse.builder()
+                .code(ErrorCode.BAD_REQUEST.getCode())
+                .message(ErrorCode.BAD_REQUEST.getDefaultMessage())
+                .errors(errors)
+                .build());
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequest(BadRequestException ex) {
-        return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiErrorResponse> handleApiException(ApiException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(ApiErrorResponse.builder()
+                .code(errorCode.getCode())
+                .message(ex.getMessage())
+                .build());
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<Map<String, String>> handleUnauthorized(UnauthorizedException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", ex.getMessage()));
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleGeneral(Exception ex) {
+        return ResponseEntity.internalServerError().body(ApiErrorResponse.builder()
+                .code(ErrorCode.INTERNAL_ERROR.getCode())
+                .message(ErrorCode.INTERNAL_ERROR.getDefaultMessage())
+                .build());
     }
 }

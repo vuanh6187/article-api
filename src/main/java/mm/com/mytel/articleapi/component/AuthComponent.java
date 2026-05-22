@@ -5,7 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import mm.com.mytel.articleapi.dto.RegisterRequest;
 import mm.com.mytel.articleapi.entity.User;
-import mm.com.mytel.articleapi.exception.BadRequestException;
+import mm.com.mytel.articleapi.exception.ApiException;
 import mm.com.mytel.articleapi.service.AuthService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -55,7 +55,7 @@ public class AuthComponent {
             User user = authService.register(request);
             authService.loginUser(user, httpRequest);
             return "redirect:/home";
-        } catch (BadRequestException ex) {
+        } catch (ApiException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             return "register";
         }
