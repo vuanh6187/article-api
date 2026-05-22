@@ -99,6 +99,7 @@ public class ArticleApiComponent {
                 .description(article.getDescription())
                 .content(article.getContent())
                 .tag(article.getTag())
+                .isLockComment(article.isLockComment())
                 .authorUsername(article.getAuthor().getUsername())
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())

@@ -19,4 +19,6 @@ public class ArticleRequest {
 
     @NotBlank(message = "Tag is required")
     private String tag;
+
+    private boolean isLockComment;
 }

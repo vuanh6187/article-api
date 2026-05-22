@@ -42,6 +42,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .description(request.getDescription())
                 .content(request.getContent())
                 .tag(request.getTag())
+                .lockComment(request.isLockComment())
                 .author(author)
                 .build();
         return articleRepository.save(article);
@@ -57,6 +58,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setDescription(request.getDescription());
         article.setContent(request.getContent());
         article.setTag(request.getTag());
+        article.setLockComment(request.isLockComment());
 
         return articleRepository.save(article);
     }
@@ -89,6 +91,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .title(article.getTitle())
                 .description(article.getDescription())
                 .tag(article.getTag())
+                .isLockComment(article.isLockComment())
                 .authorUsername(article.getAuthor().getUsername())
                 .build();
     }

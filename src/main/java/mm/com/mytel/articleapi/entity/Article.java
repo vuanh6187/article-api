@@ -49,6 +49,9 @@ public class Article {
     @Column(nullable = false)
     private String tag;
 
+    @Column(name = "lock_comment", nullable = false)
+    private boolean lockComment;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;

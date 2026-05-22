@@ -25,6 +25,8 @@
     <section class="content-card comments-section">
         <h2>Bình luận</h2>
 
+        <div class="alert alert-error" th:if="${commentError}" th:text="${commentError}"></div>
+
         <div class="empty-state" th:if="${#lists.isEmpty(comments)}">
             <p>Chưa có bình luận nào.</p>
         </div>
@@ -39,7 +41,14 @@
             </li>
         </ul>
 
-        <form class="comment-form" th:action="@{/articles/{id}/comments(id=${article.id})}"
+        <p class="comment-locked-notice"
+           th:if="${isLockComment and !isOwner}">
+            Bài viết này đã khóa bình luận.
+        </p>
+
+        <form class="comment-form"
+              th:if="${!isLockComment or isOwner}"
+              th:action="@{/articles/{id}/comments(id=${article.id})}"
               th:object="${commentRequest}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div class="form-group">

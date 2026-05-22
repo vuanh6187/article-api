@@ -16,6 +16,7 @@ public class ArticleResponse {
     private String description;
     private String content;
     private String tag;
+    private boolean isLockComment;
     private String authorUsername;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

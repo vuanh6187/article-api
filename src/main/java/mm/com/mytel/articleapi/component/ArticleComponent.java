@@ -8,6 +8,7 @@ import mm.com.mytel.articleapi.entity.Article;
 import mm.com.mytel.articleapi.entity.Comment;
 import mm.com.mytel.articleapi.entity.User;
 import mm.com.mytel.articleapi.exception.ApiException;
+import mm.com.mytel.articleapi.exception.BadRequestException;
 import mm.com.mytel.articleapi.service.ArticleService;
 import mm.com.mytel.articleapi.service.AuthService;
 import mm.com.mytel.articleapi.service.CommentService;
@@ -62,6 +63,7 @@ public class ArticleComponent {
         model.addAttribute("article", article);
         model.addAttribute("comments", comments);
         model.addAttribute("isOwner", articleService.isOwner(id, currentUser.getId()));
+        model.addAttribute("isLockComment", article.isLockComment());
         model.addAttribute("commentRequest", new CommentRequest());
         return "articles/detail";
     }
@@ -80,6 +82,7 @@ public class ArticleComponent {
         request.setDescription(article.getDescription());
         request.setContent(article.getContent());
         request.setTag(article.getTag());
+        request.setLockComment(article.isLockComment());
 
         model.addAttribute("articleRequest", request);
         model.addAttribute("articleId", id);
@@ -112,7 +115,7 @@ public class ArticleComponent {
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, Model model) {
+    public String delete(@PathVariable Long id) {
         try {
             User user = authService.getCurrentUser();
             articleService.delete(id, user);
@@ -132,8 +135,13 @@ public class ArticleComponent {
             return detail(id, model);
         }
 
-        User user = authService.getCurrentUser();
-        commentService.addComment(id, request, user);
-        return "redirect:/articles/" + id;
+        try {
+            User user = authService.getCurrentUser();
+            commentService.addComment(id, request, user);
+            return "redirect:/articles/" + id;
+        } catch (BadRequestException ex) {
+            model.addAttribute("commentError", ex.getMessage());
+            return detail(id, model);
+        }
     }
 }

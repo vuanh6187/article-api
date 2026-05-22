@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Article API",
-    "description": "# Article API\n\nBase URL: `{{baseUrl}}`\n\n## Authentication\n\nCac API (tru `/api/auth/**`) can header:\n\n```\nAuthorization: Bearer {{token}}\n```\n\nChay **Login** hoac **Register** truoc de tu dong luu `token`.\n\n## HTTP Status Codes\n\n| Code | Meaning | Use case |\n|------|---------|----------|\n| 200 | OK | GET, PUT thanh cong |\n| 201 | Created | Register, tao article/comment |\n| 204 | No Content | Xoa article |\n| 400 | Bad Request | Validation loi |\n| 401 | Unauthorized | Chua dang nhap / sai token |\n| 403 | Forbidden | Khong phai chu bai viet (sua/xoa) |\n| 404 | Not Found | Khong tim thay resource |\n| 409 | Conflict | Trung email/username |\n| 500 | Server Error | Loi he thong |\n\n## Error Response\n\n```json\n{\n  \"code\": 403,\n  \"message\": \"Ban khong co quyen thao tac bai viet nay\"\n}\n```\n\nValidation (400) co them field `errors`:\n\n```json\n{\n  \"code\": 400,\n  \"message\": \"Validation / bad request\",\n  \"errors\": { \"title\": \"Title is required\" }\n}\n```",
+    "description": "# Article API\n\nBase URL: `{{baseUrl}}`\n\n## Authentication\n\nCac API (tru `/api/auth/**`) can header:\n\n```\nAuthorization: Bearer {{token}}\n```\n\nChay **Login** hoac **Register** truoc de tu dong luu `token`.\n\n## Khoa binh luan (`lockComment`)\n\nMoi bai viet co field `lockComment` (boolean, mac dinh `false`):\n\n| Gia tri | Y nghia |\n|---------|--------|\n| `false` | Cho phep nguoi khac comment |\n| `true` | Khoa comment — nguoi khong phai chu bai khong the them comment moi |\n\n- Chi **chu bai viet** duoc bat/tat khi **tao** hoac **sua** bai (POST/PUT `/api/articles`).\n- Chu bai van co the comment khi bai da khoa.\n- GET danh sach/chi tiet bai viet tra ve `lockComment`.\n- GET comment cu van hoat dong khi bai da khoa.\n- POST comment khi bi khoa (khong phai chu bai): **400** — `\"Bai viet da khoa binh luan\"`.\n\n## HTTP Status Codes\n\n| Code | Meaning | Use case |\n|------|---------|----------|\n| 200 | OK | GET, PUT thanh cong |\n| 201 | Created | Register, tao article/comment |\n| 204 | No Content | Xoa article |\n| 400 | Bad Request | Validation loi / bai viet da khoa binh luan |\n| 401 | Unauthorized | Chua dang nhap / sai token |\n| 403 | Forbidden | Khong phai chu bai viet (sua/xoa) |\n| 404 | Not Found | Khong tim thay resource |\n| 409 | Conflict | Trung email/username |\n| 500 | Server Error | Loi he thong |\n\n## Error Response\n\n```json\n{\n  \"code\": 403,\n  \"message\": \"Ban khong co quyen thao tac bai viet nay\"\n}\n```\n\nValidation (400) co them field `errors`:\n\n```json\n{\n  \"code\": 400,\n  \"message\": \"Validation / bad request\",\n  \"errors\": { \"title\": \"Title is required\" }\n}\n```\n\nKhoa binh luan (400):\n\n```json\n{\n  \"code\": 400,\n  \"message\": \"Bai viet da khoa binh luan\"\n}\n```",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -133,7 +133,7 @@
     },
     {
       "name": "Articles",
-      "description": "Quan ly bai viet. Home chi hien title + description; chi tiet co full content.",
+      "description": "Quan ly bai viet. Home chi hien title + description; chi tiet co full content.\n\nField `lockComment` (boolean): khoa binh luan cho nguoi khac. Mac dinh `false`.",
       "item": [
         {
           "name": "List Articles",
@@ -146,7 +146,7 @@
               }
             ],
             "url": "{{baseUrl}}/api/articles",
-            "description": "**GET** `/api/articles`\n\n**Auth:** Bearer token\n\n**Response 200:** Danh sach summary (id, title, description, tag, authorUsername)\n\n```json\n[\n  {\n    \"id\": 1,\n    \"title\": \"Bai viet 1\",\n    \"description\": \"Mo ta ngan\",\n    \"tag\": \"java\",\n    \"authorUsername\": \"testuser\"\n  }\n]\n```"
+            "description": "**GET** `/api/articles`\n\n**Auth:** Bearer token\n\n**Response 200:** Danh sach summary\n\n```json\n[\n  {\n    \"id\": 1,\n    \"title\": \"Bai viet 1\",\n    \"description\": \"Mo ta ngan\",\n    \"tag\": \"java\",\n    \"lockComment\": false,\n    \"authorUsername\": \"testuser\"\n  }\n]\n```"
           }
         },
         {
@@ -160,7 +160,7 @@
               }
             ],
             "url": "{{baseUrl}}/api/articles/{{articleId}}",
-            "description": "**GET** `/api/articles/{id}`\n\n**Auth:** Bearer token\n\n**Response 200:** Full article (title, description, content, tag, authorUsername, createdAt, updatedAt)\n\n**Errors:** 404"
+            "description": "**GET** `/api/articles/{id}`\n\n**Auth:** Bearer token\n\n**Response 200:**\n```json\n{\n  \"id\": 1,\n  \"title\": \"Bai viet mau\",\n  \"description\": \"Mo ta ngan\",\n  \"content\": \"Noi dung day du...\",\n  \"tag\": \"springboot\",\n  \"lockComment\": false,\n  \"authorUsername\": \"testuser\",\n  \"createdAt\": \"2026-05-22T10:00:00\",\n  \"updatedAt\": \"2026-05-22T10:00:00\"\n}\n```\n\n**Errors:** 404"
           }
         },
         {
@@ -179,10 +179,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Bai viet mau\",\n  \"description\": \"Mo ta ngan ve bai viet\",\n  \"content\": \"Noi dung day du cua bai viet...\",\n  \"tag\": \"springboot\"\n}"
+              "raw": "{\n  \"title\": \"Bai viet mau\",\n  \"description\": \"Mo ta ngan ve bai viet\",\n  \"content\": \"Noi dung day du cua bai viet...\",\n  \"tag\": \"springboot\",\n  \"lockComment\": false\n}"
             },
             "url": "{{baseUrl}}/api/articles",
-            "description": "**POST** `/api/articles`\n\n**Auth:** Bearer token\n\n**Body:** title, description, content, tag\n\n**Response 201:** ArticleResponse\n\n**Errors:** 400 validation, 401"
+            "description": "**POST** `/api/articles`\n\n**Auth:** Bearer token\n\n**Body:**\n| Field | Type | Required | Mo ta |\n|-------|------|----------|-------|\n| title | string | yes | Tieu de |\n| description | string | yes | Mo ta ngan |\n| content | string | yes | Noi dung |\n| tag | string | yes | Tag |\n| lockComment | boolean | no | Khoa binh luan (mac dinh `false`) |\n\n**Response 201:** ArticleResponse (co `lockComment`)\n\n**Errors:** 400 validation, 401"
           },
           "event": [
             {
@@ -215,10 +215,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Bai viet da sua\",\n  \"description\": \"Mo ta moi\",\n  \"content\": \"Noi dung moi...\",\n  \"tag\": \"java\"\n}"
+              "raw": "{\n  \"title\": \"Bai viet da sua\",\n  \"description\": \"Mo ta moi\",\n  \"content\": \"Noi dung moi...\",\n  \"tag\": \"java\",\n  \"lockComment\": true\n}"
             },
             "url": "{{baseUrl}}/api/articles/{{articleId}}",
-            "description": "**PUT** `/api/articles/{id}`\n\n**Auth:** Bearer token\n\n**Quyen:** Chi chu bai viet\n\n**Response 200:** ArticleResponse\n\n**Errors:** 400, 401, 403, 404"
+            "description": "**PUT** `/api/articles/{id}`\n\n**Auth:** Bearer token\n\n**Quyen:** Chi chu bai viet\n\n**Body:** giong Create Article, bao gom `lockComment` de bat/tat khoa binh luan.\n\nVi du body co `\"lockComment\": true` de khoa comment cua nguoi khac.\n\n**Response 200:** ArticleResponse\n\n**Errors:** 400, 401, 403, 404"
           }
         },
         {
@@ -239,7 +239,7 @@
     },
     {
       "name": "Comments",
-      "description": "Binh luan bai viet. Moi user da dang nhap deu co the comment.",
+      "description": "Binh luan bai viet.\n\n- Moi user da dang nhap deu co the comment neu bai **chua khoa** (`lockComment: false`).\n- Neu bai da khoa (`lockComment: true`): chi **chu bai** duoc comment; nguoi khac nhan **400**.\n- Van xem duoc comment cu (GET) khi bai da khoa.",
       "item": [
         {
           "name": "List Comments",
@@ -274,7 +274,7 @@
               "raw": "{\n  \"content\": \"Binh luan hay!\"\n}"
             },
             "url": "{{baseUrl}}/api/articles/{{articleId}}/comments",
-            "description": "**POST** `/api/articles/{id}/comments`\n\n**Auth:** Bearer token\n\n**Body:** content\n\n**Response 201:** CommentResponse\n\n**Errors:** 400, 401, 404"
+            "description": "**POST** `/api/articles/{id}/comments`\n\n**Auth:** Bearer token\n\n**Body:** content\n\n**Response 201:** CommentResponse\n\n**Errors:**\n- 400 validation\n- 400 bai viet da khoa binh luan (khi `lockComment: true` va nguoi comment khong phai chu bai)\n- 401\n- 404\n\n**Vi du loi khoa binh luan:**\n```json\n{\n  \"code\": 400,\n  \"message\": \"Bai viet da khoa binh luan\"\n}\n```"
           }
         }
       ]

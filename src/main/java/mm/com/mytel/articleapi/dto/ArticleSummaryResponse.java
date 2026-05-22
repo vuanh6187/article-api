@@ -13,5 +13,6 @@ public class ArticleSummaryResponse {
     private String title;
     private String description;
     private String tag;
+    private boolean isLockComment;
     private String authorUsername;
 }

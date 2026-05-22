@@ -5,6 +5,7 @@ import mm.com.mytel.articleapi.dto.CommentRequest;
 import mm.com.mytel.articleapi.entity.Article;
 import mm.com.mytel.articleapi.entity.Comment;
 import mm.com.mytel.articleapi.entity.User;
+import mm.com.mytel.articleapi.exception.BadRequestException;
 import mm.com.mytel.articleapi.repo.CommentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,9 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public Comment addComment(Long articleId, CommentRequest request, User author) {
         Article article = articleService.findById(articleId);
+
+        if (article.isLockComment() && !articleService.isOwner(articleId, author.getId()))
+            throw new BadRequestException("Bài viết đã khóa bình luận");
 
         Comment comment = Comment.builder()
                 .content(request.getContent())
