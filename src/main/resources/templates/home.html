@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - Article</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Trang chủ - Article')}"></head>
 <body>
-<header class="header">
-    <div class="header-inner">
-        <a class="logo" th:href="@{/home}">Article</a>
-        <div class="user-menu" th:if="${currentUser != null}">
-            <span class="user-info" th:text="${currentUser.username}">username</span>
-            <a class="btn-link" th:href="@{/profile}">Sửa thông tin</a>
-            <form th:action="@{/logout}" method="post" class="logout-form">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" class="btn-link btn-logout">Đăng xuất</button>
-            </form>
-        </div>
-    </div>
-</header>
+<div th:replace="~{fragments/layout :: header}"></div>
 <main class="main">
-    <div class="content-card">
-        <p class="hello-world">Hello World</p>
+    <div class="page-header">
+        <h1>Bài viết</h1>
+        <a class="btn-primary btn-inline" th:href="@{/articles/new}">Tạo bài viết</a>
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(articles)}">
+        <p>Chưa có bài viết nào. Hãy tạo bài viết đầu tiên!</p>
+    </div>
+
+    <div class="article-list" th:if="${!#lists.isEmpty(articles)}">
+        <a class="article-card" th:each="article : ${articles}" th:href="@{/articles/{id}(id=${article.id})}">
+            <span class="article-tag" th:text="${article.tag}">tag</span>
+            <h2 class="article-title" th:text="${article.title}">Title</h2>
+            <p class="article-description" th:text="${article.description}">Description</p>
+            <span class="article-meta" th:text="'bởi ' + ${article.authorUsername}">author</span>
+        </a>
     </div>
 </main>
 </body>

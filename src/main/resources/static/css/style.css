@@ -224,3 +224,208 @@ body {
     font-size: 0.8rem;
     margin-top: 0.25rem;
 }
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+}
+
+.btn-inline {
+    width: auto;
+    margin-top: 0;
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+}
+
+.article-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.article-card {
+    display: block;
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.15s;
+}
+
+.article-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.article-tag {
+    display: inline-block;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    margin-bottom: 0.5rem;
+}
+
+.article-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: #1e293b;
+}
+
+.article-description {
+    margin: 0 0 0.75rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.article-meta {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.empty-state {
+    text-align: center;
+    color: #64748b;
+    padding: 2rem;
+}
+
+.form-page {
+    text-align: left;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.form-page h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.article-detail {
+    text-align: left;
+    margin-bottom: 1.5rem;
+}
+
+.article-detail-header h1 {
+    margin: 0.5rem 0;
+    font-size: 1.75rem;
+}
+
+.article-content {
+    margin: 1.5rem 0;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: #334155;
+}
+
+.owner-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+}
+
+.btn-danger {
+    padding: 0.7rem 1.25rem;
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.comments-section {
+    text-align: left;
+    margin-bottom: 1.5rem;
+}
+
+.comments-section h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+}
+
+.comment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+}
+
+.comment-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+}
+
+.comment-time {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.comment-content {
+    margin: 0;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.comment-form {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.back-link {
+    display: inline-block;
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}

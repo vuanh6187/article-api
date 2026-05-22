@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${article.title} + ' - Article')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+<main class="main">
+    <article class="content-card article-detail">
+        <div class="article-detail-header">
+            <span class="article-tag" th:text="${article.tag}">tag</span>
+            <h1 th:text="${article.title}">Title</h1>
+            <p class="article-meta" th:text="'bởi ' + ${article.author.username}">author</p>
+        </div>
+
+        <div class="article-content" th:text="${article.content}">Content</div>
+
+        <div class="owner-actions" th:if="${isOwner}">
+            <a class="btn-secondary" th:href="@{/articles/{id}/edit(id=${article.id})}">Sửa</a>
+            <form th:action="@{/articles/{id}/delete(id=${article.id})}" method="post" class="inline-form">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn-danger" onclick="return confirm('Xóa bài viết này?')">Xóa</button>
+            </form>
+        </div>
+    </article>
+
+    <section class="content-card comments-section">
+        <h2>Bình luận</h2>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(comments)}">
+            <p>Chưa có bình luận nào.</p>
+        </div>
+
+        <ul class="comment-list" th:if="${!#lists.isEmpty(comments)}">
+            <li class="comment-item" th:each="comment : ${comments}">
+                <div class="comment-header">
+                    <strong th:text="${comment.author.username}">user</strong>
+                    <span class="comment-time" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">time</span>
+                </div>
+                <p class="comment-content" th:text="${comment.content}">content</p>
+            </li>
+        </ul>
+
+        <form class="comment-form" th:action="@{/articles/{id}/comments(id=${article.id})}"
+              th:object="${commentRequest}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="form-group">
+                <label for="content">Viết bình luận</label>
+                <textarea id="content" th:field="*{content}" rows="3" required></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></span>
+            </div>
+            <button type="submit" class="btn-primary btn-inline">Gửi bình luận</button>
+        </form>
+    </section>
+
+    <a class="back-link" th:href="@{/home}">&larr; Về trang chủ</a>
+</main>
+</body>
+</html>

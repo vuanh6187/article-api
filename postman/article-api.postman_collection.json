@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Article API",
-    "description": "REST API cho Postman. Thymeleaf UI van chay rieng tren cung server.",
+    "description": "# Article API\n\nBase URL: `{{baseUrl}}`\n\n## Authentication\n\nCac API (tru `/api/auth/**`) can header:\n\n```\nAuthorization: Bearer {{token}}\n```\n\nChay **Login** hoac **Register** truoc de tu dong luu `token`.\n\n## HTTP Status Codes\n\n| Code | Meaning | Use case |\n|------|---------|----------|\n| 200 | OK | GET, PUT thanh cong |\n| 201 | Created | Register, tao article/comment |\n| 204 | No Content | Xoa article |\n| 400 | Bad Request | Validation loi |\n| 401 | Unauthorized | Chua dang nhap / sai token |\n| 403 | Forbidden | Khong phai chu bai viet (sua/xoa) |\n| 404 | Not Found | Khong tim thay resource |\n| 409 | Conflict | Trung email/username |\n| 500 | Server Error | Loi he thong |\n\n## Error Response\n\n```json\n{\n  \"code\": 403,\n  \"message\": \"Ban khong co quyen thao tac bai viet nay\"\n}\n```\n\nValidation (400) co them field `errors`:\n\n```json\n{\n  \"code\": 400,\n  \"message\": \"Validation / bad request\",\n  \"errors\": { \"title\": \"Title is required\" }\n}\n```",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,11 +12,16 @@
     {
       "key": "token",
       "value": ""
+    },
+    {
+      "key": "articleId",
+      "value": "1"
     }
   ],
   "item": [
     {
       "name": "Auth",
+      "description": "Dang ky va dang nhap. Tra ve JWT token.",
       "item": [
         {
           "name": "Register",
@@ -33,7 +38,7 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"username\": \"testuser\",\n  \"password\": \"123456\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/register",
-            "description": "Dang ky tai khoan moi. Tra ve JWT token."
+            "description": "**POST** `/api/auth/register`\n\n**Auth:** Khong can\n\n**Response 201:**\n```json\n{\n  \"token\": \"eyJ...\",\n  \"email\": \"test@example.com\",\n  \"username\": \"testuser\"\n}\n```\n\n**Errors:** 400 validation, 409 trung email/username"
           },
           "event": [
             {
@@ -65,7 +70,7 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"123456\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/login",
-            "description": "Dang nhap bang email + password. Tra ve JWT token."
+            "description": "**POST** `/api/auth/login`\n\n**Auth:** Khong can\n\n**Body:** email, password\n\n**Response 200:** token, email, username\n\n**Errors:** 401 sai email/password"
           },
           "event": [
             {
@@ -86,6 +91,7 @@
     },
     {
       "name": "User",
+      "description": "Quan ly thong tin user dang nhap.",
       "item": [
         {
           "name": "Get Current User",
@@ -98,7 +104,7 @@
               }
             ],
             "url": "{{baseUrl}}/api/users/me",
-            "description": "Lay thong tin user dang nhap. Can JWT token."
+            "description": "**GET** `/api/users/me`\n\n**Auth:** Bearer token\n\n**Response 200:**\n```json\n{\n  \"id\": 1,\n  \"email\": \"test@example.com\",\n  \"username\": \"testuser\"\n}\n```\n\n**Errors:** 401"
           }
         },
         {
@@ -120,7 +126,155 @@
               "raw": "{\n  \"username\": \"newusername\"\n}"
             },
             "url": "{{baseUrl}}/api/users/me",
-            "description": "Cap nhat username. Can JWT token."
+            "description": "**PUT** `/api/users/me`\n\n**Auth:** Bearer token\n\n**Body:** username (chi duoc sua username)\n\n**Response 200:** UserResponse\n\n**Errors:** 400, 401, 409 trung username"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Articles",
+      "description": "Quan ly bai viet. Home chi hien title + description; chi tiet co full content.",
+      "item": [
+        {
+          "name": "List Articles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/articles",
+            "description": "**GET** `/api/articles`\n\n**Auth:** Bearer token\n\n**Response 200:** Danh sach summary (id, title, description, tag, authorUsername)\n\n```json\n[\n  {\n    \"id\": 1,\n    \"title\": \"Bai viet 1\",\n    \"description\": \"Mo ta ngan\",\n    \"tag\": \"java\",\n    \"authorUsername\": \"testuser\"\n  }\n]\n```"
+          }
+        },
+        {
+          "name": "Get Article Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/articles/{{articleId}}",
+            "description": "**GET** `/api/articles/{id}`\n\n**Auth:** Bearer token\n\n**Response 200:** Full article (title, description, content, tag, authorUsername, createdAt, updatedAt)\n\n**Errors:** 404"
+          }
+        },
+        {
+          "name": "Create Article",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bai viet mau\",\n  \"description\": \"Mo ta ngan ve bai viet\",\n  \"content\": \"Noi dung day du cua bai viet...\",\n  \"tag\": \"springboot\"\n}"
+            },
+            "url": "{{baseUrl}}/api/articles",
+            "description": "**POST** `/api/articles`\n\n**Auth:** Bearer token\n\n**Body:** title, description, content, tag\n\n**Response 201:** ArticleResponse\n\n**Errors:** 400 validation, 401"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('articleId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Article",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bai viet da sua\",\n  \"description\": \"Mo ta moi\",\n  \"content\": \"Noi dung moi...\",\n  \"tag\": \"java\"\n}"
+            },
+            "url": "{{baseUrl}}/api/articles/{{articleId}}",
+            "description": "**PUT** `/api/articles/{id}`\n\n**Auth:** Bearer token\n\n**Quyen:** Chi chu bai viet\n\n**Response 200:** ArticleResponse\n\n**Errors:** 400, 401, 403, 404"
+          }
+        },
+        {
+          "name": "Delete Article",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/articles/{{articleId}}",
+            "description": "**DELETE** `/api/articles/{id}`\n\n**Auth:** Bearer token\n\n**Quyen:** Chi chu bai viet\n\n**Response 204:** No Content\n\n**Errors:** 401, 403, 404"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "description": "Binh luan bai viet. Moi user da dang nhap deu co the comment.",
+      "item": [
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/articles/{{articleId}}/comments",
+            "description": "**GET** `/api/articles/{id}/comments`\n\n**Auth:** Bearer token\n\n**Response 200:**\n```json\n[\n  {\n    \"id\": 1,\n    \"content\": \"Binh luan hay!\",\n    \"authorUsername\": \"testuser\",\n    \"createdAt\": \"2026-05-22T10:00:00\"\n  }\n]\n```\n\n**Errors:** 404 bai viet khong ton tai"
+          }
+        },
+        {
+          "name": "Add Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Binh luan hay!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/articles/{{articleId}}/comments",
+            "description": "**POST** `/api/articles/{id}/comments`\n\n**Auth:** Bearer token\n\n**Body:** content\n\n**Response 201:** CommentResponse\n\n**Errors:** 400, 401, 404"
           }
         }
       ]

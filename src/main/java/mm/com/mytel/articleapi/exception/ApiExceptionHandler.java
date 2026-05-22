@@ -1,5 +1,6 @@
 package mm.com.mytel.articleapi.exception;
 
+import mm.com.mytel.articleapi.component.ArticleApiComponent;
 import mm.com.mytel.articleapi.component.AuthApiComponent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice(assignableTypes = AuthApiComponent.class)
+@RestControllerAdvice(assignableTypes = {AuthApiComponent.class, ArticleApiComponent.class})
 public class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
