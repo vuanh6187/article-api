@@ -1,4 +1,4 @@
-package mm.com.mytel.articleapi.component;
+package mm.com.mytel.articleapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class AuthApiComponent {
+public class AuthApiController {
 
     private final AuthService authService;
 

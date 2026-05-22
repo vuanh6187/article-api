@@ -1,4 +1,4 @@
-package mm.com.mytel.articleapi.component;
+package mm.com.mytel.articleapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/articles")
 @RequiredArgsConstructor
-public class ArticleComponent {
+public class ArticleController {
 
     private final ArticleService articleService;
     private final CommentService commentService;

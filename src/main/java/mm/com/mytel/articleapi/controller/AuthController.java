@@ -1,4 +1,4 @@
-package mm.com.mytel.articleapi.component;
+package mm.com.mytel.articleapi.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
-public class AuthComponent {
+public class AuthController {
 
     private final AuthService authService;
 

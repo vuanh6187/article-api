@@ -1,4 +1,4 @@
-package mm.com.mytel.articleapi.component;
+package mm.com.mytel.articleapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
-public class ArticleApiComponent {
+public class ArticleApiController {
 
     private final ArticleService articleService;
     private final CommentService commentService;

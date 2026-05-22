@@ -12,7 +12,7 @@ Every `@Service` class must have an interface:
 
 - Interface: `XxxService` in `service/` or `security/`
 - Implementation: `XxxServiceImpl` with `@Service`, implements `XxxService`
-- Inject the **interface** in components/config, not the implementation
+- Inject the **interface** in controllers/config, not the implementation
 
 ```java
 // ✅ GOOD
@@ -21,7 +21,7 @@ public interface AuthService { ... }
 @Service
 public class AuthServiceImpl implements AuthService { ... }
 
-// Component
+// Controller
 private final AuthService authService;
 ```
 
@@ -72,7 +72,7 @@ Validation errors (400) may include `errors`:
 
 ## Layer structure
 
-- `component/` — MVC controllers + REST controllers
+- `controller/` — MVC controllers + REST controllers
 - `service/` — business logic (interface + impl)
 - `repo/` — JPA repositories
 - `entity/`, `dto/`, `exception/`, `config/`, `security/`

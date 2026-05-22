@@ -1,4 +1,4 @@
-package mm.com.mytel.articleapi.component;
+package mm.com.mytel.articleapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import mm.com.mytel.articleapi.dto.ArticleSummaryResponse;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-public class HomeComponent {
+public class HomeController {
 
     private final ArticleService articleService;
 
