@@ -56,7 +56,10 @@ public class Article {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "article", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)

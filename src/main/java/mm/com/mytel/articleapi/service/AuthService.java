@@ -22,6 +22,8 @@ public interface AuthService {
 
     User getCurrentUser();
 
+    User requireCurrentUser();
+
     void loginUser(User user, HttpServletRequest request);
 
     User updateProfile(Long userId, UpdateProfileRequest request, HttpServletRequest httpRequest);

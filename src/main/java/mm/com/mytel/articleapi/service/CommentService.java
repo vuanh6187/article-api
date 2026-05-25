@@ -1,6 +1,7 @@
 package mm.com.mytel.articleapi.service;
 
 import mm.com.mytel.articleapi.dto.CommentRequest;
+import mm.com.mytel.articleapi.dto.CommentResponse;
 import mm.com.mytel.articleapi.entity.Comment;
 import mm.com.mytel.articleapi.entity.User;
 
@@ -10,5 +11,9 @@ public interface CommentService {
 
     List<Comment> findByArticleId(Long articleId);
 
+    List<CommentResponse> findResponsesByArticleId(Long articleId);
+
     Comment addComment(Long articleId, CommentRequest request, User author);
+
+    CommentResponse addCommentResponse(Long articleId, CommentRequest request, User author);
 }

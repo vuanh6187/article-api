@@ -10,8 +10,10 @@ import mm.com.mytel.articleapi.dto.UpdateProfileRequest;
 import mm.com.mytel.articleapi.dto.UserResponse;
 import mm.com.mytel.articleapi.entity.User;
 import mm.com.mytel.articleapi.exception.ConflictException;
+import mm.com.mytel.articleapi.exception.ErrorCode;
 import mm.com.mytel.articleapi.exception.NotFoundException;
 import mm.com.mytel.articleapi.exception.UnauthorizedException;
+import mm.com.mytel.articleapi.mapper.UserMapper;
 import mm.com.mytel.articleapi.repo.UserRepository;
 import mm.com.mytel.articleapi.security.CustomUserDetails;
 import mm.com.mytel.articleapi.security.JwtService;
@@ -31,15 +33,16 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
     public User register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("Email đã tồn tại");
+            throw new ConflictException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new ConflictException("Username đã tồn tại");
+            throw new ConflictException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         User user = User.builder()
@@ -59,38 +62,40 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UnauthorizedException("Email hoặc mật khẩu không đúng"));
+                .orElseThrow(() -> new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Email hoặc mật khẩu không đúng");
+            throw new UnauthorizedException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         return buildAuthResponse(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponse getCurrentUserResponse() {
         User user = getCurrentUser();
         if (user == null) {
-            throw new UnauthorizedException("Unauthorized");
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
         }
-        return toUserResponse(user);
+        return userMapper.toResponse(user);
     }
 
     @Override
     @Transactional
     public UserResponse updateProfileApi(Long userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         if (userRepository.existsByUsernameAndIdNot(request.getUsername(), userId)) {
-            throw new ConflictException("Username đã tồn tại");
+            throw new ConflictException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         user.setUsername(request.getUsername());
-        return toUserResponse(userRepository.save(user));
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     @Override
@@ -100,6 +105,15 @@ public class AuthServiceImpl implements AuthService {
             return userDetails.getUser();
         }
         return null;
+    }
+
+    @Override
+    public User requireCurrentUser() {
+        User user = getCurrentUser();
+        if (user == null) {
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+        }
+        return user;
     }
 
     @Override
@@ -119,10 +133,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public User updateProfile(Long userId, UpdateProfileRequest request, HttpServletRequest httpRequest) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         if (userRepository.existsByUsernameAndIdNot(request.getUsername(), userId)) {
-            throw new ConflictException("Username đã tồn tại");
+            throw new ConflictException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         user.setUsername(request.getUsername());
@@ -134,14 +148,6 @@ public class AuthServiceImpl implements AuthService {
     private AuthResponse buildAuthResponse(User user) {
         return AuthResponse.builder()
                 .token(jwtService.generateToken(user.getEmail()))
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .build();
-    }
-
-    private UserResponse toUserResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .build();

@@ -1,5 +1,5 @@
--- (tuy chon) tao user rieng article_api neu muon tach schema khoi system
--- chay bang sql developer: connect system/vuanh6187 -> service name xepdb1 -> run script (f5)
+-- (optional) create a dedicated article_api user if you want a separate schema.
+-- Run this as a privileged Oracle user connected to service name xepdb1.
 
 alter session set container = xepdb1;
 
@@ -13,7 +13,7 @@ exception
 end;
 /
 
-create user article_api identified by article_api
+create user article_api identified by "<set-password-before-running>"
     default tablespace users
     temporary tablespace temp
     quota unlimited on users;
@@ -22,5 +22,4 @@ grant connect, resource to article_api;
 grant create view to article_api;
 grant create sequence to article_api;
 
--- neu dung system cho app thi khong can script nay.
--- hibernate se tu tao bang app_users trong schema system khi chay ung dung.
+-- If you use a different application schema, this script is not required.

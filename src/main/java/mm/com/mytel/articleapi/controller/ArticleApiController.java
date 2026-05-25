@@ -7,13 +7,13 @@ import mm.com.mytel.articleapi.dto.ArticleResponse;
 import mm.com.mytel.articleapi.dto.ArticleSummaryResponse;
 import mm.com.mytel.articleapi.dto.CommentRequest;
 import mm.com.mytel.articleapi.dto.CommentResponse;
-import mm.com.mytel.articleapi.entity.Article;
-import mm.com.mytel.articleapi.entity.Comment;
-import mm.com.mytel.articleapi.entity.User;
-import mm.com.mytel.articleapi.exception.UnauthorizedException;
 import mm.com.mytel.articleapi.service.ArticleService;
 import mm.com.mytel.articleapi.service.AuthService;
 import mm.com.mytel.articleapi.service.CommentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,46 +38,42 @@ public class ArticleApiController {
     private final AuthService authService;
 
     @GetMapping
-    public List<ArticleSummaryResponse> listArticles(
-            @RequestParam(value = "tag", required = false) String tag) {
+    public Page<ArticleSummaryResponse> listArticles(
+            @RequestParam(value = "tag", required = false) String tag,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         if (tag != null && !tag.isBlank()) {
-            return articleService.findArticleByTag(tag.trim());
+            return articleService.findArticleByTag(tag.trim(), pageable);
         }
-        return articleService.findAllSummaries();
+        return articleService.findAllSummaries(pageable);
     }
 
     @GetMapping("/{id}")
     public ArticleResponse getArticle(@PathVariable Long id) {
-        return toArticleResponse(articleService.findById(id));
+        return articleService.findResponseById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ArticleResponse createArticle(@Valid @RequestBody ArticleRequest request) {
-        User user = requireCurrentUser();
-        return toArticleResponse(articleService.create(request, user));
+        return articleService.createResponse(request, authService.requireCurrentUser());
     }
 
     @PutMapping("/{id}")
     public ArticleResponse updateArticle(
             @PathVariable Long id,
             @Valid @RequestBody ArticleRequest request) {
-        User user = requireCurrentUser();
-        return toArticleResponse(articleService.update(id, request, user));
+        return articleService.updateResponse(id, request, authService.requireCurrentUser());
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteArticle(@PathVariable Long id) {
-        User user = requireCurrentUser();
-        articleService.delete(id, user);
+        articleService.delete(id, authService.requireCurrentUser());
     }
 
     @GetMapping("/{id}/comments")
     public List<CommentResponse> listComments(@PathVariable Long id) {
-        return commentService.findByArticleId(id).stream()
-                .map(this::toCommentResponse)
-                .toList();
+        return commentService.findResponsesByArticleId(id);
     }
 
     @PostMapping("/{id}/comments")
@@ -85,38 +81,6 @@ public class ArticleApiController {
     public CommentResponse addComment(
             @PathVariable Long id,
             @Valid @RequestBody CommentRequest request) {
-        User user = requireCurrentUser();
-        return toCommentResponse(commentService.addComment(id, request, user));
-    }
-
-    private User requireCurrentUser() {
-        User user = authService.getCurrentUser();
-        if (user == null) {
-            throw new UnauthorizedException("Unauthorized");
-        }
-        return user;
-    }
-
-    private ArticleResponse toArticleResponse(Article article) {
-        return ArticleResponse.builder()
-                .id(article.getId())
-                .title(article.getTitle())
-                .description(article.getDescription())
-                .content(article.getContent())
-                .tag(article.getTag())
-                .isLockComment(article.isLockComment())
-                .authorUsername(article.getAuthor().getUsername())
-                .createdAt(article.getCreatedAt())
-                .updatedAt(article.getUpdatedAt())
-                .build();
-    }
-
-    private CommentResponse toCommentResponse(Comment comment) {
-        return CommentResponse.builder()
-                .id(comment.getId())
-                .content(comment.getContent())
-                .authorUsername(comment.getAuthor().getUsername())
-                .createdAt(comment.getCreatedAt())
-                .build();
+        return commentService.addCommentResponse(id, request, authService.requireCurrentUser());
     }
 }

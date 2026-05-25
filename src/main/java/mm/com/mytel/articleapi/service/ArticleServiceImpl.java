@@ -2,12 +2,17 @@ package mm.com.mytel.articleapi.service;
 
 import lombok.RequiredArgsConstructor;
 import mm.com.mytel.articleapi.dto.ArticleRequest;
+import mm.com.mytel.articleapi.dto.ArticleResponse;
 import mm.com.mytel.articleapi.dto.ArticleSummaryResponse;
 import mm.com.mytel.articleapi.entity.Article;
 import mm.com.mytel.articleapi.entity.User;
+import mm.com.mytel.articleapi.exception.ErrorCode;
 import mm.com.mytel.articleapi.exception.ForbiddenException;
 import mm.com.mytel.articleapi.exception.NotFoundException;
+import mm.com.mytel.articleapi.mapper.ArticleMapper;
 import mm.com.mytel.articleapi.repo.ArticleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,20 +23,34 @@ import java.util.List;
 public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final ArticleMapper articleMapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<ArticleSummaryResponse> findAllSummaries() {
         return articleRepository.findAllWithAuthorOrderByCreatedAtDesc().stream()
-                .map(this::toSummary)
+                .map(articleMapper::toSummaryResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ArticleSummaryResponse> findAllSummaries(Pageable pageable) {
+        return articleRepository.findAllWithAuthor(pageable)
+                .map(articleMapper::toSummaryResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ArticleResponse findResponseById(Long id) {
+        return articleMapper.toResponse(findById(id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Article findById(Long id) {
         return articleRepository.findByIdWithAuthor(id)
-                .orElseThrow(() -> new NotFoundException("Bài viết không tồn tại"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ARTICLE_NOT_FOUND));
     }
 
     @Override
@@ -50,6 +69,12 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    public ArticleResponse createResponse(ArticleRequest request, User author) {
+        return articleMapper.toResponse(create(request, author));
+    }
+
+    @Override
+    @Transactional
     public Article update(Long id, ArticleRequest request, User currentUser) {
         Article article = findById(id);
         ensureOwner(article, currentUser);
@@ -61,6 +86,12 @@ public class ArticleServiceImpl implements ArticleService {
         article.setLockComment(request.isLockComment());
 
         return articleRepository.save(article);
+    }
+
+    @Override
+    @Transactional
+    public ArticleResponse updateResponse(Long id, ArticleRequest request, User currentUser) {
+        return articleMapper.toResponse(update(id, request, currentUser));
     }
 
     @Override
@@ -83,24 +114,20 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(readOnly = true)
     public List<ArticleSummaryResponse> findArticleByTag(String tag) {
         return articleRepository.findAllArticleWithTag(tag).stream()
-                .map(this::toSummary)
+                .map(articleMapper::toSummaryResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ArticleSummaryResponse> findArticleByTag(String tag, Pageable pageable) {
+        return articleRepository.findAllArticleWithTag(tag, pageable)
+                .map(articleMapper::toSummaryResponse);
     }
 
     private void ensureOwner(Article article, User currentUser) {
         if (!article.getAuthor().getId().equals(currentUser.getId())) {
-            throw new ForbiddenException("Bạn không có quyền thao tác bài viết này");
+            throw new ForbiddenException(ErrorCode.ARTICLE_NOT_OWNER);
         }
-    }
-
-    private ArticleSummaryResponse toSummary(Article article) {
-        return ArticleSummaryResponse.builder()
-                .id(article.getId())
-                .title(article.getTitle())
-                .description(article.getDescription())
-                .tag(article.getTag())
-                .isLockComment(article.isLockComment())
-                .authorUsername(article.getAuthor().getUsername())
-                .build();
     }
 }

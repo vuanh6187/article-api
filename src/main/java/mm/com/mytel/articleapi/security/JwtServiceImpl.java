@@ -3,7 +3,7 @@ package mm.com.mytel.articleapi.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import mm.com.mytel.articleapi.config.JwtProperties;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -16,11 +16,9 @@ public class JwtServiceImpl implements JwtService {
     private final SecretKey secretKey;
     private final long expirationMs;
 
-    public JwtServiceImpl(
-            @Value("${app.jwt.secret}") String secret,
-            @Value("${app.jwt.expiration-ms}") long expirationMs) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
+    public JwtServiceImpl(JwtProperties jwtProperties) {
+        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
+        this.expirationMs = jwtProperties.getExpirationMs();
     }
 
     @Override
